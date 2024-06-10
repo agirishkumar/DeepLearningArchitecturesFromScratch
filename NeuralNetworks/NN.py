@@ -420,6 +420,7 @@ def plot_accuracies(model, filename="training_accuracy.png"):
 
     This function plots the training and validation accuracies over epochs using matplotlib. The training accuracy is plotted with the label 'Training Accuracy', and if the model object has a 'val_accuracies' attribute, the validation accuracy is also plotted with the label 'Validation Accuracy'. The x-axis represents the epochs, and the y-axis represents the accuracy. The plot is titled 'Training and Validation Accuracy Over Epochs'. The legend is displayed to differentiate between the training and validation accuracies. The plot is saved as an image file with the specified filename in the 'NeuralNetworks' directory. The plot is then closed to free up memory.
     """
+    plt.plot(model.accuracies, label='Training Accuracy')
     if hasattr(model, 'val_accuracies'):
         plt.plot(model.val_accuracies, label='Validation Accuracy')
     plt.xlabel('Epochs')
