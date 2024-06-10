@@ -91,3 +91,5 @@ DeepLearningArchitecturesFromScratch/
 ├── LICENSE
 └── README.md
 
+create the conda virtual environment with the libraries:
+`conda env create -f environment.yml`
