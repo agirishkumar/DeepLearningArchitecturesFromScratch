@@ -49,6 +49,7 @@ class NeuralNetwork:
         Returns:
             float or array-like: The sigmoid value or values corresponding to the input.
         """
+        return 1 / (1 + np.exp(-x))
 
     def sigmoid_derivative(self, x):
         """
@@ -60,6 +61,7 @@ class NeuralNetwork:
         Returns:
             float or array-like: The sigmoid derivative value or values corresponding to the input.
         """
+        return x * (1 - x)
 
     def relu(self, x):
         """
@@ -71,6 +73,7 @@ class NeuralNetwork:
         Returns:
             numpy.ndarray: The output array after applying the ReLU activation function.
         """
+        return np.maximum(0, x)
 
     def relu_derivative(self, x):
         """
@@ -82,6 +85,7 @@ class NeuralNetwork:
         Returns:
             array-like: The derivative value or values corresponding to the input.
         """
+        return np.where(x > 0, 1, 0)
 
     def activate(self, x, activation):
         """
@@ -144,6 +148,8 @@ class NeuralNetwork:
             z = np.dot(self.activations[-1], self.weights[i]) + self.biases[i]
             self.z_values.append(z)
             activation = self.activate(z, self.hidden_activation)
+            if activation is None:
+                raise ValueError("Activation function returned None")
             if training and self.dropout_rate > 0:
                 activation = self.dropout(activation, self.dropout_rate)
             self.activations.append(activation)
@@ -152,6 +158,8 @@ class NeuralNetwork:
         z = np.dot(self.activations[-1], self.weights[-1]) + self.biases[-1]
         self.z_values.append(z)
         output = self.activate(z, self.output_activation)
+        if output is None:
+            raise ValueError("Output activation function returned None")
         self.activations.append(output)
 
         return self.activations[-1]
