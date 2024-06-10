@@ -34,7 +34,6 @@ The repository will include the following architectures:
 DeepLearningArchitecturesFromScratch/
 ├── NeuralNetworks/
 │   ├── nn.py
-│   ├── dnn.py
 │   └── README.md
 ├── ConvolutionalNeuralNetworks/
 │   ├── cnn.py
