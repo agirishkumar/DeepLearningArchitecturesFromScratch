@@ -4,6 +4,22 @@ import matplotlib.pyplot as plt
 
 class NeuralNetwork:
     def __init__(self, layer_sizes, hidden_activation='sigmoid', output_activation='sigmoid', learning_rate=0.01, seed=None, dropout_rate=0.0, l2_lambda=0.0, batch_size=1):
+        """
+        Initializes a NeuralNetwork object.
+
+        Args:
+            layer_sizes (List[int]): A list of integers representing the number of neurons in each layer.
+            hidden_activation (str, optional): The activation function to be used in the hidden layers. Defaults to 'sigmoid'.
+            output_activation (str, optional): The activation function to be used in the output layer. Defaults to 'sigmoid'.
+            learning_rate (float, optional): The learning rate for the optimization algorithm. Defaults to 0.01.
+            seed (int, optional): The seed value for random number generation. Defaults to None.
+            dropout_rate (float, optional): The dropout rate for regularization. Defaults to 0.0.
+            l2_lambda (float, optional): The L2 regularization parameter. Defaults to 0.0.
+            batch_size (int, optional): The number of samples in each batch. Defaults to 1.
+
+        Returns:
+            None
+        """
         if seed is not None:
             np.random.seed(seed)
 
@@ -24,18 +40,64 @@ class NeuralNetwork:
             self.biases.append(np.zeros((1, layer_sizes[i + 1])))
 
     def sigmoid(self, x):
-        return 1 / (1 + np.exp(-x))
+        """
+        Calculates the sigmoid function for the given input.
+
+        Parameters:
+            x (float or array-like): The input value or values for which the sigmoid function is to be calculated.
+
+        Returns:
+            float or array-like: The sigmoid value or values corresponding to the input.
+        """
 
     def sigmoid_derivative(self, x):
-        return x * (1 - x)
+        """
+        Calculates the derivative of the sigmoid function for the given input.
+
+        Parameters:
+            x (float or array-like): The input value or values for which the sigmoid derivative is to be calculated.
+
+        Returns:
+            float or array-like: The sigmoid derivative value or values corresponding to the input.
+        """
 
     def relu(self, x):
-        return np.maximum(0, x)
+        """
+        Apply the rectified linear unit (ReLU) activation function to the input.
+
+        Parameters:
+            x (numpy.ndarray): The input array.
+
+        Returns:
+            numpy.ndarray: The output array after applying the ReLU activation function.
+        """
 
     def relu_derivative(self, x):
-        return np.where(x > 0, 1, 0)
+        """
+        Calculate the derivative of the Rectified Linear Unit (ReLU) activation function.
+
+        Parameters:
+            x (array-like): The input value or values for which the derivative is to be calculated.
+
+        Returns:
+            array-like: The derivative value or values corresponding to the input.
+        """
 
     def activate(self, x, activation):
+        """
+        Apply the specified activation function to the input.
+
+        Parameters:
+            x (array-like): The input value or values for which the activation function is to be applied.
+            activation (str): The name of the activation function to be used. Supported values are 'sigmoid' and 'relu'.
+
+        Returns:
+            array-like: The output value or values after applying the activation function.
+
+        Raises:
+            ValueError: If an unsupported activation function is specified.
+        """
+
         if activation == 'sigmoid':
             return self.sigmoid(x)
         elif activation == 'relu':
@@ -44,6 +106,20 @@ class NeuralNetwork:
             raise ValueError(f"Unsupported activation function: {activation}")
 
     def activate_derivative(self, x, activation):
+        """
+        Calculate the derivative of the specified activation function.
+
+        Parameters:
+            x (array-like): The input value or values for which the derivative is to be calculated.
+            activation (str): The name of the activation function. Supported values are 'sigmoid' and 'relu'.
+
+        Returns:
+            array-like: The derivative value or values corresponding to the input.
+
+        Raises:
+            ValueError: If an unsupported activation function is specified.
+        """
+
         if activation == 'sigmoid':
             return self.sigmoid_derivative(x)
         elif activation == 'relu':
@@ -52,6 +128,15 @@ class NeuralNetwork:
             raise ValueError(f"Unsupported activation function: {activation}")
 
     def forward(self, inputs, training=True):
+        """
+        Performs the forward pass through the neural network.
+        Args:
+            inputs (ndarray): The input data of shape (batch_size, input_dim).
+            training (bool, optional): Whether the forward pass is for training or inference. Defaults to True.
+        Returns:
+            ndarray: The output of the neural network of shape (batch_size, output_dim).
+        """
+        
         self.activations = [inputs]
         self.z_values = []
 
@@ -72,10 +157,30 @@ class NeuralNetwork:
         return self.activations[-1]
 
     def dropout(self, x, rate):
+        """
+        Apply dropout to the input tensor.
+
+        Args:
+            x (numpy.ndarray): The input tensor.
+            rate (float): The dropout rate.
+
+        Returns:
+            numpy.ndarray: The input tensor with dropout applied.
+        """
         mask = np.random.binomial(1, 1 - rate, size=x.shape) / (1 - rate)
         return x * mask
 
     def backward(self, inputs, targets):
+        """
+        Performs the backpropagation algorithm to update the weights and biases of the neural network.
+
+        Args:
+            inputs (ndarray): The input data of shape (batch_size, input_dim).
+            targets (ndarray): The target values of shape (batch_size, output_dim).
+
+        Returns:
+            None
+        """
         # Compute the output error and delta
         output_error = targets - self.activations[-1]
         output_delta = output_error * self.activate_derivative(self.activations[-1], self.output_activation)
@@ -98,6 +203,19 @@ class NeuralNetwork:
             self.biases[i] += np.sum(deltas[i], axis=0, keepdims=True) * self.learning_rate
 
     def train(self, inputs, targets, epochs=10000, verbose=True, validation_data=None):
+        """
+        Trains the neural network model on the given input data and targets.
+
+        Args:
+            inputs (ndarray): The input data of shape (batch_size, input_dim).
+            targets (ndarray): The target values of shape (batch_size, output_dim).
+            epochs (int, optional): The number of training epochs. Defaults to 10000.
+            verbose (bool, optional): Whether to print the training progress. Defaults to True.
+            validation_data (tuple, optional): The validation data in the form of (inputs, targets). Defaults to None.
+
+        Returns:
+            None
+        """
         self.losses = []
         self.val_losses = []
         self.accuracies = []
@@ -134,18 +252,71 @@ class NeuralNetwork:
                     print(f"Epoch {epoch}/{epochs}: loss = {loss:.4f}, accuracy = {accuracy:.4f}")
 
     def accuracy(self, predictions, targets):
+        """
+        Calculates the accuracy of the model's predictions.
+
+        Parameters:
+            predictions (ndarray): The predicted values.
+            targets (ndarray): The ground truth values.
+
+        Returns:
+            ndarray: The accuracy of the model's predictions.
+        """
+
         return np.mean((predictions > 0.5) == targets)
 
     def predict(self, inputs):
+        """
+        Perform a forward pass on the neural network with the given inputs.
+
+        Parameters:
+            inputs (ndarray): The input data to the neural network.
+
+        Returns:
+            ndarray: The output of the neural network.
+        """
         return self.forward(inputs, training=False)
 
 def normalize_data(X):
+    """
+    Normalizes the input data by subtracting the mean and dividing by the standard deviation.
+
+    Parameters:
+        X (ndarray): The input data to be normalized.
+
+    Returns:
+        ndarray: The normalized data with the same shape as the input.
+
+    Note:
+        If the standard deviation of a feature is zero, it is set to 1 to prevent division by zero.
+    """
     mean = np.mean(X, axis=0)
     std = np.std(X, axis=0)
     std[std == 0] = 1  # Prevent division by zero
     return (X - mean) / std
 
 def cross_validate(model_class, layer_sizes, X, y, k=5, epochs=10000, learning_rate=0.1, hidden_activation='relu', output_activation='sigmoid', dropout_rate=0.0, l2_lambda=0.0, batch_size=1, seed=None):
+    """
+    Cross-validates a given model class using k-fold validation.
+
+    Args:
+        model_class (class): The class of the model to be cross-validated.
+        layer_sizes (list): A list of integers representing the number of neurons in each layer of the model.
+        X (ndarray): The input data for training and testing.
+        y (ndarray): The target values for training and testing.
+        k (int, optional): The number of folds in k-fold cross-validation. Defaults to 5.
+        epochs (int, optional): The number of training epochs. Defaults to 10000.
+        learning_rate (float, optional): The learning rate for the model. Defaults to 0.1.
+        hidden_activation (str, optional): The activation function for the hidden layers. Defaults to 'relu'.
+        output_activation (str, optional): The activation function for the output layer. Defaults to 'sigmoid'.
+        dropout_rate (float, optional): The dropout rate for regularization. Defaults to 0.0.
+        l2_lambda (float, optional): The L2 regularization parameter. Defaults to 0.0.
+        batch_size (int, optional): The number of samples in each batch. Defaults to 1.
+        seed (int, optional): The seed value for random number generation. Defaults to None.
+
+    Returns:
+        tuple: A tuple containing the average loss and accuracy across all folds.
+    """    
     kf = KFold(n_splits=k)
     fold = 1
     losses = []
@@ -171,6 +342,22 @@ def cross_validate(model_class, layer_sizes, X, y, k=5, epochs=10000, learning_r
     return losses, accuracies
 
 def hyperparameter_tuning(model_class, layer_sizes, X, y, param_grid, k=5, epochs=10000):
+    """
+    Hyperparameter tuning for a given model class using k-fold cross-validation.
+
+    Args:
+        model_class (class): The class of the model to be tuned.
+        layer_sizes (list): A list of integers representing the number of neurons in each layer of the model.
+        X (ndarray): The input data for training and testing.
+        y (ndarray): The target values for training and testing.
+        param_grid (dict): A dictionary of parameter grids to test.
+        k (int, optional): The number of folds in k-fold cross-validation. Defaults to 5.
+        epochs (int, optional): The number of training epochs. Defaults to 10000.
+
+    Returns:
+        tuple: A tuple containing the best model, best parameters, and a list of all results.
+
+    """    
     best_loss = float('inf')
     best_params = None
     best_model = None
@@ -190,6 +377,18 @@ def hyperparameter_tuning(model_class, layer_sizes, X, y, param_grid, k=5, epoch
     return best_model, best_params, all_results
 
 def plot_losses(model, filename="training_loss.png"):
+    """
+    Plot the training and validation losses over epochs.
+
+    Args:
+        model (object): The model object containing the losses.
+        filename (str, optional): The name of the file to save the plot. Defaults to "training_loss.png".
+
+    Returns:
+        None
+
+    This function plots the training and validation losses over epochs using matplotlib. The training loss is plotted with the label 'Training Loss', and if the model object has a 'val_losses' attribute, the validation loss is also plotted with the label 'Validation Loss'. The x-axis represents the epochs, and the y-axis represents the loss. The plot is titled 'Training and Validation Loss Over Epochs'. The legend is displayed to differentiate between the training and validation losses. The plot is saved as an image file with the specified filename in the 'NeuralNetworks' directory. The plot is then closed to free up memory.
+    """
     plt.plot(model.losses, label='Training Loss')
     if hasattr(model, 'val_losses'):
         plt.plot(model.val_losses, label='Validation Loss')
@@ -201,7 +400,18 @@ def plot_losses(model, filename="training_loss.png"):
     plt.close()
 
 def plot_accuracies(model, filename="training_accuracy.png"):
-    plt.plot(model.accuracies, label='Training Accuracy')
+    """
+    Plot the training and validation accuracies over epochs.
+
+    Args:
+        model (object): The model object containing the accuracies.
+        filename (str, optional): The name of the file to save the plot. Defaults to "training_accuracy.png".
+
+    Returns:
+        None
+
+    This function plots the training and validation accuracies over epochs using matplotlib. The training accuracy is plotted with the label 'Training Accuracy', and if the model object has a 'val_accuracies' attribute, the validation accuracy is also plotted with the label 'Validation Accuracy'. The x-axis represents the epochs, and the y-axis represents the accuracy. The plot is titled 'Training and Validation Accuracy Over Epochs'. The legend is displayed to differentiate between the training and validation accuracies. The plot is saved as an image file with the specified filename in the 'NeuralNetworks' directory. The plot is then closed to free up memory.
+    """
     if hasattr(model, 'val_accuracies'):
         plt.plot(model.val_accuracies, label='Validation Accuracy')
     plt.xlabel('Epochs')
